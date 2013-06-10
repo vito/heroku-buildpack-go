@@ -11,16 +11,6 @@ file=${GOFILE:-go$ver.$(uname|tr A-Z a-z)-amd64.tar.gz}
 url=${GOURL:-http://go.googlecode.com/files/$file}
 buildpack=$(dirname $(dirname $0))
 
-# Python
-venv=$cache/venv
-mkdir -p $cache/pip
-python=python2.7
-PATH=$venv/bin:$PATH
-
-virtualenv() {
-    python "$buildpack/vendor/virtualenv-1.7/virtualenv.py" "$@"
-}
-
 if ! test -f $build/.godir
 then
     echo >&2 " !     A .godir is required. For instructions:"
@@ -52,15 +42,12 @@ GOROOT=$cache/go-$ver/go export GOROOT
 GOPATH=$build/.heroku/g export GOPATH
 PATH=$GOROOT/bin:$PATH
 
-
 name=$(cat $build/.godir)
-p=$GOPATH/src/$name
-mkdir -p $p
-cp -R $build/* $p
+cp -R $build $GOPATH
 
 unset GIT_DIR # unset git dir or it will mess with goinstall
 echo "-----> Running: go get -tags heroku ./..."
-cd $p
+cd $GOPATH
 find .
 pwd
 go get -tags heroku ./...
